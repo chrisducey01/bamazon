@@ -12,11 +12,36 @@ const connection = mysql.createConnection(
     }
 )
 
-connection.connect(err=>{
-    if(err) throw err;
-    console.log("Connection established.");
-    connection.end(err=>{
+
+inquirer.prompt([
+    {
+        message: "Connect to the database?",
+        name: "connect",
+        type: "confirm"
+    }
+]).then(answers => {
+    // console.log(answers)
+    if (answers.connect) {
+        connection.connect(err => {
+            if (err) throw err;
+            console.log("Connection established.");
+            listItems(connection,"products");
+            connection.end(err => {
+                if (err) throw err;
+                console.log("Connection closed.");
+            });
+        })
+    }
+    else{
+        console.log("Ok I won't try to connect then.")
+    }
+
+});
+
+
+function listItems(connection, tableName){
+    connection.query("SELECT * FROM ??",[tableName],(err,res)=>{
         if(err) throw err;
-        console.log("Connection closed.");
-    });
-})
+        console.table(res);
+    })
+}
