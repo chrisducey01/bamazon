@@ -51,6 +51,7 @@ function purchaseItem(connection) {
                 //If there isn't enough in stock, don't complete the purchase
                 if (res[0].stock_quantity < answers.purchase_quantity) {
                     console.log("Sorry there aren't enough in stock to fulfill your order.");
+                    listAllItems(connection, "products", ["item_id", "product_name", "price"], purchaseItem);
                 }
                 //else complete the purchase and update the inventory level
                 else {
