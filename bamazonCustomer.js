@@ -82,8 +82,9 @@ function purchaseItem(connection, itemId) {
                     console.log(`Ordering ${answers.purchase_quantity} of the ${res[0].product_name}.  Thank you for your purchase!`);
 
                     let new_quantity = res[0].stock_quantity - answers.purchase_quantity;
-                    connection.query("UPDATE products SET stock_quantity = ? WHERE item_id = ?", [new_quantity, itemId],
-                        (function (price, quantity) {
+                    let purchase_total = (res[0].price * answers.purchase_quantity).toFixed(2);
+                    connection.query("UPDATE products SET stock_quantity = ?, product_sales = product_sales + ? WHERE item_id = ?", [new_quantity, purchase_total, itemId],
+                        (function (total) {
                             return function (err, rows, fields) {
                                 if (err) throw err;
                                 // console.log(`Updating inventory`);
@@ -91,11 +92,11 @@ function purchaseItem(connection, itemId) {
                                     console.log(`Sorry there was an issue placing your order.  Please try again.`);
                                 }
                                 else {
-                                    console.log(`Order successful.  Your total is ${(price * quantity).toFixed(2)}`)
+                                    console.log(`Order successful.  Your total is ${total}`);
                                 }
                                 start();
                             }
-                        })(res[0].price, answers.purchase_quantity)
+                        })(purchase_total)
                     );
                 }
             });
