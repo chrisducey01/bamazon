@@ -53,9 +53,9 @@ function start() {
 function calcDeptTotals(connection, callback){
     let sqlText = `
         select d.department_id, d.department_name, d.over_head_costs, 
-            sum(p.product_sales) as product_sales, sum(p.product_sales) - d.over_head_costs as total_profit
-        from products p 
-        join departments d on p.department = d.department_id
+            sum(IFNULL(p.product_sales,0)) as product_sales, sum(IFNULL(p.product_sales,0)) - d.over_head_costs as total_profit
+        from departments d 
+        left join products p on d.department_id = p.department
         group by d.department_id
         order by d.department_name`;
 
