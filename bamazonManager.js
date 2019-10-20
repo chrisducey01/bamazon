@@ -49,6 +49,16 @@ function start() {
 `);
                 listItems(connection, TABLE_NAME, ITEM_LIST, "WHERE stock_quantity < 5", start);
                 break;
+            case "Add to Inventory":
+                console.log(`
+#################################################
+# Current stock levels::
+#################################################
+                `);   
+                listItems(connection, TABLE_NAME, ITEM_LIST, null, ()=>{
+                    addToIventory(connection, start);             
+                });
+                break;
             case "Add New Product":
                 addNewProduct(connection, start);
                 break;
@@ -74,6 +84,46 @@ function listItems(connection, tableName, fieldList, whereClause, callback) {
     })
 }
 
+
+function addToIventory(connection, callback){
+    inquirer.prompt([
+        {
+            message:  "Enter the item_id of the product you want to add inventory to (Enter 0 to cancel): ",
+            type: "number",
+            name: "item_id"
+        }
+    ]).then(answers=>{
+        if(answers.item_id > 0){
+            updateInventory(connection,answers.item_id,callback);
+        }
+        else{
+            callback();
+        }
+    });
+}
+
+
+function updateInventory(connection, itemId, callback){
+    inquirer.prompt([
+        {
+            message: "Enter the amount of items to add to inventory: ",
+            type: "number",
+            name: "quantity"
+        }
+    ]).then(answers=>{
+        connection.query("UPDATE products SET stock_quantity = ? + stock_quantity WHERE item_id = ?",[answers.quantity,itemId],(err,results,fields)=>{
+            console.log("");
+            if(results.changedRows > 0){
+                console.log(`Successfully added ${answers.quantity} items to item_id [${itemId}].`);
+            }
+            else{
+                console.log(`Error updating inventory. Please try again.`);                
+            }
+            console.log("");
+            callback();
+        });
+    });
+}
 
 function addNewProduct(connection, callback){
     inquirer.prompt([
@@ -121,6 +171,28 @@ function addNewProduct(connection, callback){
     });
 };
 
+
+function endConnection(connection) {
+    connection.end(err => {
+        if (err) throw err;
+        console.log("");
+        console.log("Connection closed.");
+
+    });
+}
+
+
+connection.connect(err => {
+    if (err) throw err;
+    console.log("Connection established.");
+    start();
+});
+
+
+
+
+/*
+  Old code, delete before wrapping up
 
 function promptForItem(connection) {
     inquirer.prompt([
@@ -190,20 +262,4 @@ function purchaseItem(connection, itemId) {
     });
 };
 
-
-function endConnection(connection) {
-    connection.end(err => {
-        if (err) throw err;
-        console.log("");
-        console.log("Connection closed.");
-
-    });
-}
-
-
-connection.connect(err => {
-    if (err) throw err;
-    console.log("Connection established.");
-    start();
-});
-
+*/
