@@ -127,48 +127,57 @@ function updateInventory(connection, itemId, callback){
 
 
 function addNewProduct(connection, callback){
-    inquirer.prompt([
-        {
-            message: "Prouct Name: ",
-            type: "input",
-            name: "product_name"
-        },
-        {
-            message: "Department: ",
-            type: "input",
-            name: "product_dept"
-        },
-        {
-            message: "Price per unit: ",
-            type: "number",
-            name: "product_price"
-        },
-        {
-            message: "Number of units to add to inventory: ",
-            type: "number",
-            name: "product_quantity"
-        }
-    ]).then(answers=>{
-        const product = { 
-            product_name: answers.product_name,
-            department_name: answers.product_dept,
-            price: answers.product_price,
-            stock_quantity: answers.product_quantity
-        };
+    //Get the list of existing departments
+    connection.query("Select * from departments order by department_name",(err,results,fields)=>{
+        if(err) throw err;
 
-        connection.query("INSERT INTO products SET ?",product,(err,results,fields)=>{
-            if(err) throw err;
+        let deptArr = results.map(dept=>{return dept.department_name});
+        
+        inquirer.prompt([
+            {
+                message: "Prouct Name: ",
+                type: "input",
+                name: "product_name"
+            },
+            {
+                message: "Department: ",
+                type: "list",
+                choices: deptArr,
+                name: "product_dept"
+            },
+            {
+                message: "Price per unit: ",
+                type: "number",
+                name: "product_price"
+            },
+            {
+                message: "Number of units to add to inventory: ",
+                type: "number",
+                name: "product_quantity"
+            }
+        ]).then(answers=>{
+            const product = { 
+                product_name: answers.product_name,
+                department: results.find(e=>{ return e.department_name === answers.product_dept;}).department_id,
+                price: answers.product_price,
+                stock_quantity: answers.product_quantity
+            };
 
-            console.log("");
-            if(results.affectedRows == 1){    
-                console.log("New product successfully added to inventory!");
-            }
-            else{
-                console.log("Error adding to inventory.  Please try again.");
-            }
-            console.log("");
-            callback();
+            connection.query("INSERT INTO products SET ?",product,(err,results,fields)=>{
+                if(err) throw err;
+    
+                console.log("");
+                if(results.affectedRows == 1){    
+                    console.log("New product successfully added to inventory!");
+                }
+                else{
+                    console.log("Error adding to inventory.  Please try again.");
+                }
+                console.log("");
+                callback();
+            });
         });
+    
     });
 };
 
