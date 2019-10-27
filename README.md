@@ -60,6 +60,10 @@ The `bamazonSupervisor.js` file should be executed for the online store supervis
 node bamazonSupervisor.js
 ```
 
+## Demo
+
+[View Demo Video](https://drive.google.com/file/d/1jaFwhrL9LYH07QrbzBVssSl82rqFOc_g/view?usp=sharing) - Click on the link to watch a demo video to see how each of the three CLI apps work.
+
 ## Authors
 
 * **Christopher Ducey** - *Initial work* - [chrisducey01](https://github.com/chrisducey01)
